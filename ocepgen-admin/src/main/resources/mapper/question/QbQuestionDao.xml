@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="io.ocepgen.modules.question.dao.QbQuestionDao">
+
+    <resultMap type="io.ocepgen.modules.question.entity.QbQuestionEntity" id="qbQuestionMap">
+        <result property="id" column="id"/>
+        <result property="content" column="content"/>
+        <result property="type" column="type"/>
+        <result property="analysis" column="analysis"/>
+        <result property="difficulty" column="difficulty"/>
+        <result property="scope" column="scope"/>
+        <result property="score" column="score"/>
+        <result property="courseId" column="course_id"/>
+        <result property="creator" column="creator"/>
+        <result property="createDate" column="create_date"/>
+        <result property="updateDate" column="update_date"/>
+    </resultMap>
+    <select id="getList" resultType="io.ocepgen.modules.question.entity.QbQuestionEntity">
+        SELECT t1.*, (select course_name from course where id = t1.course_id) as course_name
+        FROM qb_question t1
+        where 1=1
+        <if test="schoolId != null and schoolId.trim() != ''">
+            and t1.course_id in (select id from course where grade_id in (select id from sys_school_grade where school_id = #{schoolId}))
+        </if>
+        <if test="courseId != null and courseId.trim() != ''">
+            and t1.course_id = #{courseId}
+        </if>
+        <if test="scope != null and scope.trim() != ''">
+            <!--如果选为私有，那么只获取当前账号创建的题目-->
+            <if test="scope == 1">
+                and t1.creator = #{userId}
+            </if>
+            and t1.scope = #{scope}
+        </if>
+        <if test="content != null and content.trim() != ''">
+            and t1.content like concat('%',#{content},'%')
+        </if>
+        <!--通过题目idList来查询-->
+        <if test="idList != null and idList.size() > 0">
+            and t1.id in
+            <foreach collection="idList" item="id" index="index" open="(" close=")" separator=",">
+                #{id}
+            </foreach>
+        </if>
+        <if test="type != null and type.trim() != ''">
+            and t1.type = #{type}
+        </if>
+        <!--   通过多个题目类型进行查询     -->
+        <if test="typeList!= null and typeList.size() > 0">
+            and t1.type in
+            <foreach collection="typeList" item="type" index="index" open="(" close=")" separator=",">
+                #{type}
+            </foreach>
+        </if>
+    </select>
+<!--
+如果有主键，那么count(主键)最快
+count(*)和count(1)的结果一样，都包括对NULL的统计，而count(字段) 不包括NULL的统计；
+实操中，选择使用 count(1)的情况比较多
+-->
+    <select id="getQuestionCountByCondition" resultType="java.lang.Integer">
+        select count(t1.id) from qb_question t1
+        where 1=1
+        <if test="schoolId != null and schoolId.trim() != ''">
+            and t1.course_id in
+            (select id from course where grade_id in
+            (select id from sys_school_grade where school_id = #{schoolId}))
+        </if>
+        <if test="startDate != null and startDate.trim() != ''">
+            and t1.create_date >= #{startDate}
+        </if>
+        <!--        ＜![CDATA[ ]]＞ 将xml中被此标签包围的内容标记为纯文本-->
+        <if test="endDate != null and endDate.trim() != ''">
+            and t1.create_date <![CDATA[ <= ]]> #{endDate}
+        </if>
+        <if test="type != null and type.trim() != ''">
+            and t1.type = #{type}
+        </if>
+    </select>
+
+
+</mapper>

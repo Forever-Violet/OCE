@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="io.ocepgen.modules.exam.dao.ExamSubtitleDao">
+
+    <resultMap type="io.ocepgen.modules.exam.entity.ExamSubtitleEntity" id="examSubtitleMap">
+        <result property="id" column="id"/>
+        <result property="examSubtitleName" column="exam_subtitle_name"/>
+        <result property="examPaperId" column="exam_paper_id"/>
+        <result property="sort" column="sort"/>
+        <result property="createDate" column="create_date"/>
+    </resultMap>
+
+
+</mapper>

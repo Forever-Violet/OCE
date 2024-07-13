@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="io.ocepgen.modules.exam.dao.EpExamPaperDao">
+
+    <resultMap type="io.ocepgen.modules.exam.entity.EpExamPaperEntity" id="epExamPaperMap">
+        <result property="id" column="id"/>
+        <result property="title" column="title"/>
+        <result property="courseId" column="course_id"/>
+        <result property="type" column="type"/>
+        <result property="score" column="score"/>
+        <result property="questionCount" column="question_count"/>
+        <result property="remark" column="remark"/>
+        <result property="creator" column="creator"/>
+        <result property="createDate" column="create_date"/>
+    </resultMap>
+    <select id="getList" resultType="io.ocepgen.modules.exam.entity.EpExamPaperEntity">
+        SELECT t1.*, (select course_name from course where id = t1.course_id) as course_name
+        FROM ep_exam_paper t1
+        where 1=1
+        <if test="schoolId != null and schoolId.trim() != ''">
+            and t1.course_id in (select id from course where grade_id in (select id from sys_school_grade where school_id = #{schoolId}))
+        </if>
+        <if test="courseId != null and courseId.trim() != ''">
+            and t1.course_id = #{courseId}
+        </if>
+        <if test="scope != null and scope.trim() != ''">
+            <!--如果选为私有，那么只获取当前账号创建的试卷-->
+            <if test="scope == 1">
+                and t1.creator = #{userId}
+            </if>
+            and t1.scope = #{scope}
+        </if>
+        <if test="title != null and title.trim() != ''">
+            and t1.title like concat('%',#{title},'%')
+        </if>
+        <if test="type != null and type.trim() != ''">
+            and t1.type = #{type}
+        </if>
+    </select>
+    <select id="getExamPaperCountByCondition" resultType="java.lang.Integer">
+        select count(id) from ep_exam_paper t1
+        where 1=1
+        <if test="schoolId != null and schoolId.trim() != ''">
+            and t1.course_id in
+            (select id from course where grade_id in
+            (select id from sys_school_grade where school_id = #{schoolId}))
+        </if>
+        <if test="type != null and type.trim() != ''">
+            and t1.type = #{type}
+        </if>
+    </select>
+
+</mapper>

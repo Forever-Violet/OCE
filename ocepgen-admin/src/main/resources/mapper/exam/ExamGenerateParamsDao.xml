@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="io.ocepgen.modules.exam.dao.ExamGenerateParamsDao">
+
+    <resultMap type="io.ocepgen.modules.exam.entity.ExamGenerateParamsEntity" id="examGenerateParamsMap">
+        <result property="id" column="id"/>
+        <result property="populationSize" column="population_size"/>
+        <result property="maxIteratorNum" column="maxIterator_num"/>
+        <result property="mutationRate" column="mutation_rate"/>
+        <result property="crossoverRate" column="crossover_rate"/>
+        <result property="expectedFitness" column="expected_fitness"/>
+        <result property="accuracy" column="accuracy"/>
+        <result property="useTimes" column="use_times"/>
+        <result property="scope" column="scope"/>
+        <result property="createDate" column="create_date"/>
+        <result property="creator" column="creator"/>
+    </resultMap>
+    <select id="getList" resultType="io.ocepgen.modules.exam.entity.ExamGenerateParamsEntity">
+        SELECT t1.*
+        FROM exam_generate_params t1
+        where 1=1
+        <if test="schoolId != null and schoolId.trim() != ''">
+            and t1.school_id = #{schoolId}
+        </if>
+
+        <if test="scope != null and scope.trim() != ''">
+            <!--如果选为私有，那么只获取当前账号创建的试卷-->
+            <if test="scope == 1">
+                and t1.creator = #{userId}
+            </if>
+            and t1.scope = #{scope}
+        </if>
+
+        <if test="configName != null and configName.trim() != ''">
+            and t1.config_name like concat('%',#{configName},'%')
+        </if>
+    </select>
+
+
+</mapper>
